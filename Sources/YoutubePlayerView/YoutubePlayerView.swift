@@ -206,9 +206,13 @@ open class YoutubePlayerView: UIView {
                 self.loadingView = loadingView
             }
             
-            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] t in
-                self?.webView.evaluateJavaScript("forceInject();", completionHandler: { (res, err) in })
-            })
+            if #available(iOS 10.0, *) {
+                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] t in
+                    self?.webView.evaluateJavaScript("forceInject();", completionHandler: { (res, err) in })
+                })
+            } else {
+                // Fallback on earlier versions
+            }
         }
         
         DispatchQueue.main.async(execute: { () -> Void in
