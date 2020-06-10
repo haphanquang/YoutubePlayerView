@@ -765,11 +765,10 @@ extension YoutubePlayerView {
             if let data = data {
                 delegate?.playerView(self, didPlayWithSource: data)
             }
-        }
             
         case .onYouTubeIframeAPIFailedToLoad:
             loadingView?.removeFromSuperview()
-            
+        }
     }
 }
 

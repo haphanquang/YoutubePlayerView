@@ -89,7 +89,7 @@ enum YoutubePlayerUtils {
                 }
                 window.location.href = 'ytplayer://onError?data=' + event.data;
             }
-    
+        
             function videoTags() {
                 return document.getElementsByTagName("video");
             }
@@ -177,6 +177,6 @@ enum Callback: String {
     case onPlaybackQualityChange = "onPlaybackQualityChange"
     case onError = "onError"
     case onPlayTime = "onPlayTime"
-    
+    case onFoundSource = "onFoundSource"
     case onYouTubeIframeAPIFailedToLoad = "onYouTubeIframeAPIFailedToLoad"
 }
