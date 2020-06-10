@@ -78,6 +78,14 @@ public protocol YoutubePlayerViewDelegate: class {
     /// - Parameter playerView: `YoutubePlayerView` setting up.
     /// - Returns: A `UIView` object that will be displayed while YouTube iframe API is being loaded. Pass nil to display no custom loading view. Default implementation returns nil.
     func playerViewPreferredInitialLoadingView(_ playerView: YoutubePlayerView) -> UIView?
+    
+    
+    /// Callback invoked frequently when playBack is plaing.
+    ///
+    /// - Parameters:
+    ///   - playerView: The `YoutubePlayerView` instance where the error has occurred.
+    ///   - source: content video's source URL in base64.
+    func playerView(_ playerView: YoutubePlayerView, didPlayWithSource source: String)
 }
 
 public extension YoutubePlayerViewDelegate {
@@ -86,6 +94,7 @@ public extension YoutubePlayerViewDelegate {
     func playerView(_ playerView: YoutubePlayerView, didChangeToQuality quality: YoutubePlaybackQuality) { }
     func playerView(_ playerView: YoutubePlayerView, receivedError error: Error) { }
     func playerView(_ playerView: YoutubePlayerView, didPlayTime time: Float) { }
+    func playerView(_ playerView: YoutubePlayerView, didPlayWithSource source: String) { }
     func playerViewPreferredBackgroundColor(_ playerView: YoutubePlayerView) -> UIColor { return .white }
     func playerViewPreferredInitialLoadingView(_ playerView: YoutubePlayerView) -> UIView? { return nil }
 }
@@ -300,6 +309,7 @@ extension YoutubePlayerView {
     public func loadVideoById(_ videoId: String, startSeconds: Float, suggestedQuality quality: YoutubePlaybackQuality) {
         let command = "player.loadVideoById('\(videoId)', \(startSeconds), '\(quality.rawValue)');"
         webView.evaluateJavaScript(command, completionHandler: nil)
+        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Loads a given video by its video ID for playback starting and ending at the given times
@@ -315,6 +325,7 @@ extension YoutubePlayerView {
     public func loadVideoById(_ videoId: String, startSeconds: Float, endSeconds: Float, suggestedQuality quality: YoutubePlaybackQuality) {
         let command = "player.loadVideoById({'videoId': '\(videoId)', 'startSeconds': \(startSeconds), 'endSeconds': \(endSeconds), 'suggestedQuality': '\(quality.rawValue)'});"
         webView.evaluateJavaScript(command, completionHandler: nil)
+        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Cues a given video by its video ID for playback starting at the given time and with the
@@ -365,6 +376,7 @@ extension YoutubePlayerView {
         }
         
         webView.evaluateJavaScript(command, completionHandler: nil)
+        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Cues a given video by its URL on YouTube.com for playback starting at the given time
@@ -748,9 +760,16 @@ extension YoutubePlayerView {
             if let data = data, let time = Float(data) {
                 delegate?.playerView(self, didPlayTime: time)
             }
+        
+        case .onFoundSource:
+            if let data = data {
+                delegate?.playerView(self, didPlayWithSource: data)
+            }
+        }
+            
         case .onYouTubeIframeAPIFailedToLoad:
             loadingView?.removeFromSuperview()
-        }
+            
     }
 }
 

@@ -42,6 +42,7 @@ enum YoutubePlayerUtils {
         
             var player;
             var error = false;
+            var lastCount = 0;
         
             function onYouTubeIframeAPIReady() {
                 player = new YT.Player('existing-iframe-example', {
@@ -88,10 +89,50 @@ enum YoutubePlayerUtils {
                 }
                 window.location.href = 'ytplayer://onError?data=' + event.data;
             }
-        
+    
+            function videoTags() {
+                return document.getElementsByTagName("video");
+            }
+
+            function setupVideoPlayingHandler() {
+                try {
+                    var videos = videoTags()
+                    for (var i = 0; i < videos.length; i++) {
+                        
+                        videos.item(i).onplaying = function() {
+                            window.location.href = 'ytplayer://onFoundSource?data=' + btoa(this.src);
+                        }
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+
+            function setupVideoPlayingListener() {
+                
+                if (videoTags().length > 0 || videoTags().length != lastCount) {
+                    setupVideoPlayingHandler();
+                    lastCount = videoTags().length
+                    
+                    //Wait for 100ms then check again (because content is pushed as users browse web)
+                    setTimeout(setupVideoPlayingListener, 100);
+                    return
+                }
+
+                // Otherwise, wait for 100ms and check again.
+                setTimeout(setupVideoPlayingListener, 100);
+            }
+
+            function forceInject(){
+                setupVideoPlayingHandler();
+                return "injected"
+            }
+
             window.onresize = function() {
                 player.setSize(window.innerWidth, window.innerHeight);
             }
+        
+            setupVideoPlayingListener();
         </script>
         """
     }
