@@ -105,6 +105,7 @@ open class YoutubePlayerView: UIView {
     private var autoplay = false
     
     public weak var delegate: YoutubePlayerViewDelegate?
+    private var timer: Timer?
     
     private var configuration: WKWebViewConfiguration {
         let preferences = WKPreferences()
@@ -204,6 +205,10 @@ open class YoutubePlayerView: UIView {
                 add(subview: loadingView)
                 self.loadingView = loadingView
             }
+            
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] t in
+                self?.webView.evaluateJavaScript("forceInject();", completionHandler: { (res, err) in })
+            })
         }
         
         DispatchQueue.main.async(execute: { () -> Void in
@@ -309,7 +314,6 @@ extension YoutubePlayerView {
     public func loadVideoById(_ videoId: String, startSeconds: Float, suggestedQuality quality: YoutubePlaybackQuality) {
         let command = "player.loadVideoById('\(videoId)', \(startSeconds), '\(quality.rawValue)');"
         webView.evaluateJavaScript(command, completionHandler: nil)
-        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Loads a given video by its video ID for playback starting and ending at the given times
@@ -325,7 +329,6 @@ extension YoutubePlayerView {
     public func loadVideoById(_ videoId: String, startSeconds: Float, endSeconds: Float, suggestedQuality quality: YoutubePlaybackQuality) {
         let command = "player.loadVideoById({'videoId': '\(videoId)', 'startSeconds': \(startSeconds), 'endSeconds': \(endSeconds), 'suggestedQuality': '\(quality.rawValue)'});"
         webView.evaluateJavaScript(command, completionHandler: nil)
-        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Cues a given video by its video ID for playback starting at the given time and with the
@@ -376,7 +379,6 @@ extension YoutubePlayerView {
         }
         
         webView.evaluateJavaScript(command, completionHandler: nil)
-        webView.evaluateJavaScript("forceInject();", completionHandler: nil)
     }
     
     /// Cues a given video by its URL on YouTube.com for playback starting at the given time
